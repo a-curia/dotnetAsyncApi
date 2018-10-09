@@ -21,7 +21,7 @@ namespace Books.Api.Services
 
         public async Task<Book> GetBookAsync(Guid bookId)
         {
-            await _context.Database.ExecuteSqlCommandAsync("WAITFOR DELAI '00:00:02';");
+            //await _context.Database.ExecuteSqlCommandAsync("WAITFOR DELAI '00:00:02';");
 
             return await _context.Books.Include(a => a.Author).FirstOrDefaultAsync(b => b.Id == bookId);
         }
@@ -59,7 +59,7 @@ namespace Books.Api.Services
         public IEnumerable<Book> GetBooks()
         {
             // simulate long running operation
-            _context.Database.ExecuteSqlCommand("WAITFOR DELAI '00:00:02';");
+            //_context.Database.ExecuteSqlCommand("WAITFOR DELAI '00:00:02';");
 
             return _context.Books.Include(a => a.Author).ToList();
         }
@@ -67,6 +67,15 @@ namespace Books.Api.Services
         public Book GetBook(Guid bookId)
         {
             return _context.Books.Include(a => a.Author).FirstOrDefault(b => b.Id == bookId);
+        }
+
+        public async Task AddBookAsync(Book bookToAdd)
+        {
+            if (bookToAdd == null)
+            {
+                throw new ArgumentNullException(nameof(bookToAdd));
+            }
+            await _context.AddAsync(bookToAdd); // this means it's added to the DbSet not to the DB, so the Async is only usefull when autogen id to the DB - this is no IO bound opperation
         }
     }
 }

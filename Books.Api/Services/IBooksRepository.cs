@@ -10,12 +10,14 @@ namespace Books.Api.Services
     {
 
         // synchronous
-        IEnumerable<Book> GetBooks();
+        IEnumerable<Entities.Book> GetBooks();
         Book GetBook(Guid bookId);
 
         // asynchronous
-        Task<IEnumerable<Book>> GetBooksAsync();
+        Task<IEnumerable<Entities.Book>> GetBooksAsync();
         Task<Book> GetBookAsync(Guid bookId);
+
+        Task AddBookAsync(Entities.Book bookToAdd);
 
     }
 }

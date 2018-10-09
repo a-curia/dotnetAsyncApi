@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Books.Api.Contexts;
 using Books.Api.Services;
 using Microsoft.AspNetCore.Builder;
@@ -38,6 +39,9 @@ namespace Books.Api
 
             // register the repository
             services.AddScoped<IBooksRepository, BooksRepository>(); // the context should be equal to or shorter to the DbContext - db context is disposed off after each request
+
+            // register the Auto Mapper
+            services.AddAutoMapper(); // loaded from the nuget package, scans for classes that inherit from Profile
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
