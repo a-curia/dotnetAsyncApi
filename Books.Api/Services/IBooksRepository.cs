@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 
 namespace Books.Api.Services
 {
-    interface IBooksRepository
+    public interface IBooksRepository
     {
 
-        //IEnumerable<Book> GetBooks();
-        //Book GetBook(Guid id);
+        // synchronous
+        IEnumerable<Book> GetBooks();
+        Book GetBook(Guid bookId);
 
+        // asynchronous
         Task<IEnumerable<Book>> GetBooksAsync();
-        Task<Book> GetBookAsync(Guid id);
+        Task<Book> GetBookAsync(Guid bookId);
 
     }
 }

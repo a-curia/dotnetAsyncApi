@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Books.Api.Contexts;
 using Microsoft.AspNetCore;
@@ -18,6 +19,8 @@ namespace Books.Api
         {
             //CreateWebHostBuilder(args).Build().Run();
 
+            // throttle the thread pool (set available threads to amount of processors) // set the maximum threads to the processor count - core cpu
+            ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
             // migrate the database. Best practice = in Main, using service scope
             var host = CreateWebHostBuilder(args).Build();
