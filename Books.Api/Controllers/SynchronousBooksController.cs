@@ -22,6 +22,10 @@ namespace Books.Api.Controllers
         [HttpGet]
         public IActionResult GetBooks()
         {
+            // Pitfall #2: blocking asynchronous code
+            // var bookEntities = _booksRepository.GetBooksAsync().Result;
+            // // _booksRepository.GetBooksAsync().Wait();
+
             var bookEntities = _booksRepository.GetBooks();
             return Ok(bookEntities);
         }

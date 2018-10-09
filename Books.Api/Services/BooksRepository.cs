@@ -31,9 +31,25 @@ namespace Books.Api.Services
 
         public async Task<Book> GetBookAsync(Guid id)
         {
+            // Pitfall #1: using Task.Run() on the server
+            //_logger.LogInformation($"ThreadId when entering GetBookAsync: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            // var bookPages = await GetBookPages();
+
             return await _context.Books.Include(b => b.Author)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
+
+        // Pitfall #1: using Task.Run() on the server
+        //private Task<int> GetBookPages()
+        //{
+        //    return Task.Run(() =>
+        //    {
+        //        _logger.LogInformation($"ThreadId when calculating the amount of pages: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+        //        var pageCalculator = new Books.Legacy.ComplicatedPageCalculator();
+        //        return pageCalculator.CalculateBookPages();
+        //    });
+        //}
 
         public async Task<IEnumerable<Book>> GetBooksAsync()
         {
@@ -65,6 +81,38 @@ namespace Books.Api.Services
 
         }
 
+     // Piftall #3: modifying shared state
+     //   // note: using HttpClient directly for readability purposes. 
+     //   // It's better to initialize the client via _httpClientFactory, 
+     //   // eg on constructing
+
+     //   private HttpClient _httpClient = new HttpClient();
+
+     //   public async Task<IEnumerable<BookCover>> DownloadBookCoverAsync(Guid bookId)
+     //   {
+     //       var bookCoverUrls = new[]
+     //       {
+     //    $"http://localhost:52644/api/bookcovers/{bookId}-dummycover1",
+     //    $"http://localhost:52644/api/bookcovers/{bookId}-dummycover2"
+     //};
+
+     //       var bookCovers = new List<BookCover>();
+     //       var downloadTask1 = DownloadBookCoverAsync(bookCoverUrls[0], bookCovers);
+     //       var downloadTask2 = DownloadBookCoverAsync(bookCoverUrls[1], bookCovers);
+     //       await Task.WhenAll(downloadTask1, downloadTask2);
+     //       return bookCovers;
+     //   }
+
+     //   private async Task DownloadBookCoverAsync(string bookCoverUrl, List<BookCover> bookCovers)
+     //   {
+     //       var response = await _httpClient.GetAsync(bookCoverUrl);
+     //       var bookCover = JsonConvert.DeserializeObject<BookCover>(
+     //               await response.Content.ReadAsStringAsync());
+
+     //       bookCovers.Add(bookCover);
+     //   }
+
+
         public async Task<IEnumerable<BookCover>> GetBookCoversAsync(Guid bookId)
         {
             var httpClient = _httpClientFactory.CreateClient();
@@ -75,7 +123,7 @@ namespace Books.Api.Services
             var bookCoverUrls = new[]
             {
                 $"http://localhost:52644/api/bookcovers/{bookId}-dummycover1",
-                $"http://localhost:52644/api/bookcovers/{bookId}-dummycover2?returnFault=true",
+              //  $"http://localhost:52644/api/bookcovers/{bookId}-dummycover2?returnFault=true",
                 $"http://localhost:52644/api/bookcovers/{bookId}-dummycover3",
                 $"http://localhost:52644/api/bookcovers/{bookId}-dummycover4",
                 $"http://localhost:52644/api/bookcovers/{bookId}-dummycover5"
@@ -126,7 +174,7 @@ namespace Books.Api.Services
         private async Task<BookCover> DownloadBookCoverAsync(
         HttpClient httpClient, string bookCoverUrl, CancellationToken cancellationToken)
         {
-            throw new Exception("Cannot download book cover, writer isn't finishing book fast enough.");
+          //  throw new Exception("Cannot download book cover, writer isn't finishing book fast enough.");
 
             var response = await httpClient
                        .GetAsync(bookCoverUrl, cancellationToken);
