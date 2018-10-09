@@ -15,16 +15,15 @@ namespace Books.Api.Controllers
 
         public SynchronousBooksController(IBooksRepository booksRepository)
         {
-            _booksRepository = booksRepository ?? throw new ArgumentNullException(nameof(booksRepository));
+            _booksRepository = booksRepository ?? 
+                throw new ArgumentNullException(nameof(booksRepository));
         }
 
         [HttpGet]
         public IActionResult GetBooks()
         {
             var bookEntities = _booksRepository.GetBooks();
-
             return Ok(bookEntities);
         }
-
     }
 }

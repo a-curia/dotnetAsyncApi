@@ -14,12 +14,11 @@ namespace Books.Api.Entities
         public Guid Id { get; set; }
 
         [Required]
-        [MaxLength(50)]
+        [MaxLength(150)]
         public string FirstName { get; set; }
 
         [Required]
         [MaxLength(150)]
         public string LastName { get; set; }
-
     }
 }

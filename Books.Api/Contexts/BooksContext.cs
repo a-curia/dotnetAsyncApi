@@ -9,16 +9,13 @@ namespace Books.Api.Contexts
 {
     public class BooksContext : DbContext
     {
+        public DbSet<Book> Books { get; set; }
 
-        public BooksContext(DbContextOptions<BooksContext> options) : base(options)
+        public BooksContext(DbContextOptions<BooksContext> options)
+            : base(options)
         {
-
         }
 
-        public DbSet<Book> Books { get; set; } 
-        // if we want to expose Authors we must add also the DbSet for Authors
-
-        // populate with data at stratup
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // seed the database with dummy data

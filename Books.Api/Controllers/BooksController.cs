@@ -1,4 +1,5 @@
-﻿using Books.Api.Filters;
+﻿using AutoMapper;
+using Books.Api.Filters;
 using Books.Api.Models;
 using Books.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,14 +12,17 @@ namespace Books.Api.Controllers
 {
     [Route("api/books")]
     [ApiController]
-    public class BooksController : ControllerBase // will enforce the attribute base routing, present on netcore 2.1>; convention based routing is ment for mvc not for apis
+    public class BooksController : ControllerBase
     {
         private IBooksRepository _booksRepository;
+        private readonly IMapper _mapper;
 
-        // inject the repository
-        public BooksController(IBooksRepository booksRepository)
+        public BooksController(IBooksRepository booksRepository,
+            IMapper mapper)
         {
-            _booksRepository = booksRepository ?? throw new ArgumentNullException(nameof(booksRepository));
+            _booksRepository = booksRepository 
+                ?? throw new ArgumentNullException(nameof(booksRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpGet]
@@ -26,33 +30,46 @@ namespace Books.Api.Controllers
         public async Task<IActionResult> GetBooks()
         {
             var bookEntities = await _booksRepository.GetBooksAsync();
-
             return Ok(bookEntities);
         }
 
         [HttpGet]
-        [BookResultFilter]
-        [Route("{bookId}")]
-        public async Task<IActionResult> GetBook(Guid bookId)
+        [BookWithCoversResultFilter]
+        [Route("{id}", Name = "GetBook")]
+        public async Task<IActionResult> GetBook(Guid id)
         {
-            var bookEntity = await _booksRepository.GetBookAsync(bookId);
-
+            var bookEntity = await _booksRepository.GetBookAsync(id);
             if (bookEntity == null)
             {
                 return NotFound();
             }
 
-            return Ok(bookEntity);
+            var bookCovers = await _booksRepository.GetBookCoversAsync(id);
+
+            //var propertyBag = new Tuple<Entities.Book, IEnumerable<ExternalModels.BookCover>>(
+            //    bookEntity, bookCovers);
+
+            //(Entities.Book book, IEnumerable<ExternalModels.BookCover> bookCovers) propertyBag = 
+            //    (bookEntity, bookCovers);
+
+            return Ok((bookEntity, bookCovers));            
         }
 
         [HttpPost]
+        [BookResultFilter]
         public async Task<IActionResult> CreateBook([FromBody] BookForCreation book)
         {
+            var bookEntity = _mapper.Map<Entities.Book>(book);
+            _booksRepository.AddBook(bookEntity);
 
+            await _booksRepository.SaveChangesAsync();
 
-            return Ok();
+            // Fetch (refetch) the book from the data store, including the author
+            await _booksRepository.GetBookAsync(bookEntity.Id);
+
+            return CreatedAtRoute("GetBook",
+                new { id = bookEntity.Id },
+                bookEntity);
         }
-
-
     }
 }

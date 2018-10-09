@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Books.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -8,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace Books.Api.Filters
 {
-    public class BooksResultFilterAttribute : ResultFilterAttribute
+    public class BookWithCoversResultFilterAttribute : ResultFilterAttribute
     {
         public override async Task OnResultExecutionAsync(
             ResultExecutingContext context,
             ResultExecutionDelegate next)
         {
-            
+
             var resultFromAction = context.Result as ObjectResult;
             if (resultFromAction?.Value == null
                 || resultFromAction.StatusCode < 200
@@ -24,8 +25,12 @@ namespace Books.Api.Filters
                 return;
             }
 
-            resultFromAction.Value = Mapper.Map<IEnumerable<Models.Book>>(
-                resultFromAction.Value);
+            var (book, bookCovers) = ((Entities.Book, 
+                IEnumerable<ExternalModels.BookCover>))resultFromAction.Value;
+
+            var mappedBook = Mapper.Map<BookWithCovers>(book);
+
+            resultFromAction.Value = Mapper.Map(bookCovers, mappedBook);
 
             await next();
         }
